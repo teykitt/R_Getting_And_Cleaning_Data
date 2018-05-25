@@ -51,33 +51,32 @@
     #  P3:  Execute P2 script for test and train and merge the data frames together
 
 # Create data directory to store downloaded files
-# if (!file.exists("data")) {
-#     dir.create("data")
-# }
-# 
-
+ if (!file.exists("data")) {
+     dir.create("data")
+ }
+ 
 # set the working directory path
 setwd("~/Desktop/Data_Science_Track/Getting_And_Cleaning_Data/Week_4/Assignment/data")
 
 # # P1.  Download and unzip the data
 
-# setwd("data")
-# fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
-# download.file(fileUrl, destfile="dataset.zip", method = "curl")
-# dateDownloaded <- date()
-# unzip("dataset.zip")
+ setwd("data")
+ fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
+ download.file(fileUrl, destfile="dataset.zip", method = "curl")
+ dateDownloaded <- date()
+ unzip("dataset.zip")
 
 # P2.  Create script to compile each data set into it's own data frame
     #  Script name:  compile_uci_df.R
 
 # P3:  Execute P2 script for test and train and merge the data frames together
-# test_df <- compile_uci_df ("test")
-# train_df <- compile_uci_df ("train")
-# final_df <- rbind(test_df, train_df)
+ test_df <- compile_uci_df ("test")
+ train_df <- compile_uci_df ("train")
+ final_df <- rbind(test_df, train_df)
 
 # 2. Extracts only the measurements on the mean and standard deviation for each measurement.
 # Extracting the first three columns SubjectId, ActivityID, Activity_Name along with all varriables related to mean/std
-# sub_final_df <- final_df[c(1:3, grep ("([mM]ean|[sS]td)", names(test)))]
+ sub_final_df <- final_df[c(1:3, grep ("([mM]ean|[sS]td)", names(test)))]
 
 # 3. Uses descriptive activity names to name the activities in the data set
 # 4. Appropriately labels the data set with descriptive variable names.
@@ -90,8 +89,8 @@ setwd("~/Desktop/Data_Science_Track/Getting_And_Cleaning_Data/Week_4/Assignment/
 # Expected new tidy data would have combination of rows = (subject x activity) x columns (avg for each 86 varibles)
 
 # Get the unique list of SubjectID and ActivityID from the data set
-uniqSubjectID <- unique(sub_final_df$SubjectId)
-uniqActivityName <- unique(sub_final_df$Activity_Name)
+# uniqSubjectID <- unique(sub_final_df$SubjectId)
+# uniqActivityName <- unique(sub_final_df$Activity_Name)
 
 # create base tidy data frame from the unique SubjectID and ActivityName combinations
 tidy_avg_df <- unique.data.frame(sub_final_df[,c(1,3)])
@@ -100,18 +99,26 @@ tidy_avg_df <- unique.data.frame(sub_final_df[,c(1,3)])
 rownames(tidy_avg_df) <- NULL 
 
 # calculate the mean of each variable for each row of tidy_avg_df
+
 for (r in 1:nrow(tidy_avg_df)) { # for each row
-    print(paste("For row number: ", r))
+    # print(paste("For row number: ", r))
+    
     for (v in names(sub_final_df)[-(1:3)]) { # for each variable column (except the first 3)
-        print(paste("For variable: ", v))
+        # print(paste("For variable: ", v))
         # print the subject, activity and calculated mean for each variable
-        print(paste("Mean for Subject: ", tidy_avg_df[r,1], " Activity_name: ", tidy_avg_df[r,2], 
-            " calc mean: ", mean(sub_final_df[sub_final_df$SubjectId == tidy_avg_df[r, 1] 
-                                & sub_final_df$Activity_Name == tidy_avg_df[r, 2], v])))
+        # print(paste("Mean for Subject: ", tidy_avg_df[r,1], " Activity_name: ", tidy_avg_df[r,2], 
+        #    " calc mean: ", mean(sub_final_df[sub_final_df$SubjectId == tidy_avg_df[r, 1] 
+        #                        & sub_final_df$Activity_Name == tidy_avg_df[r, 2], v])))
         
         # calculate and store the mean for each variable
         tidy_avg_df[r, v] <- mean(sub_final_df[sub_final_df$SubjectId == tidy_avg_df[r, 1] 
-                                               & sub_final_df$Activity_Name == tidy_avg_df[r, 2], v])
+                                & sub_final_df$Activity_Name == tidy_avg_df[r, 2], v])
     }
 }
 
+# Prefix the variable columns with Avg_ to indicate these are the new calculated averages
+names(tidy_avg_df)[-(1:3)] <- paste("Avg_", names(tidy_avg_df)[-(1:3)], sep="")
+
+# Write out the output of the final tidy data set
+write.table(tidy_avg_df, 
+            file="/Users/janma/Desktop/Data_Science_Track/Getting_And_Cleaning_Data/Week_4/Assignment/data/tidy_avg_df.txt", row.names=FALSE)
